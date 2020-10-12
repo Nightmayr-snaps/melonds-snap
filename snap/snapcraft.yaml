@@ -17,7 +17,7 @@ description: |
   **Disclaimer:**
   This snap is not necessarily endorsed or officially maintained by the upstream developers.
   * Upstream Project: http://melonds.kuribo64.net/
-  * snapcraft.yaml Build Definition: https://github.com/Nightmayr/melonds-snap/blob/master/snap/snapcraft.yaml
+  * snapcraft.yaml Build Definition: https://github.com/Nightmayr-snaps/melonds-snap/blob/master/snap/snapcraft.yaml
 
 license: GPL-3.0
 icon: snap/gui/melonds.png

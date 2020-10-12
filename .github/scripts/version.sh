@@ -6,11 +6,11 @@ CURRENT_VERSION_SNAP="$(snap info melonds | grep stable | head -n 2 | tail -n 1 
 
 
 # compare versions
-if [ $CURRENT_VERSION_TAG_SNAP != $LATEST_VERSION_TAG ]; then
-    echo "versions don't match, github: $LATEST_VERSION_TAG snap: $CURRENT_VERSION_TAG_SNAP"
+if [ $CURRENT_VERSION_SNAP != $LATEST_VERSION_TAG ]; then
+    echo "versions don't match, github: $LATEST_VERSION_TAG snap: $CURRENT_VERSION_SNAP"
     echo true >> build
 else
-    echo "versions match, github: $LATEST_VERSION_TAG snap: $CURRENT_VERSION_TAG_SNAP"
+    echo "versions match, github: $LATEST_VERSION_TAG snap: $CURRENT_VERSION_SNAP"
     echo false >> build
 fi
 
