@@ -1,0 +1,158 @@
+name: melonds
+base: core20
+adopt-info: melonds
+summary: DS emulator, sorta
+description: |
+  melonDS aims at providing fast and accurate Nintendo DS emulation. While it is still a work in progress, it has a pretty solid set of features:
+
+  * Nearly complete core (CPU, video, audio, ...)
+  * OpenGL renderer, 3D upscaling
+  * RTC, microphone, lid close/open
+  * Joystick support
+  * Savestates
+  * Various display position/sizing/rotation modes
+  * (WIP) Wifi: local multiplayer, online connectivity
+  * and more are planned!
+
+  **Disclaimer:**
+  This snap is not necessarily endorsed or officially maintained by the upstream developers.
+  * Upstream Project: http://melonds.kuribo64.net/
+  * snapcraft.yaml Build Definition: https://github.com/Nightmayr/melonds-snap/blob/master/snap/snapcraft.yaml
+
+license: GPL-3.0
+icon: snap/gui/melonds.png
+grade: stable # must be 'stable' to release into candidate/stable channels
+confinement: strict # use 'strict' once you have the right plugs and slots
+architectures:
+  - build-on: amd64
+
+parts:
+  melonds:
+    source: https://github.com/Arisotura/melonDS.git
+    plugin: cmake
+    cmake-parameters: 
+    - -DCMAKE_BUILD_TYPE=Release
+    override-pull: |
+      snapcraftctl pull
+      snapcraftctl set-version "$(git describe --tags | cut -d "-" -f1)"
+      git checkout "$(git describe --tags | cut -d "-" -f1)"
+    override-build: |
+      snapcraftctl build
+      sed -i 's|Icon=net.kuribo64.melonDS|Icon=/usr/local/share/icons/hicolor/256x256/apps/net.kuribo64.melonDS.png|' $SNAPCRAFT_PART_INSTALL/usr/local/share/applications/net.kuribo64.melonDS.desktop
+    build-packages:
+    - cmake
+    - libgtk-3-dev 
+    - libcurl4-gnutls-dev 
+    - libpcap0.8-dev 
+    - libsdl2-dev 
+    - qtbase5-dev 
+    - qtdeclarative5-dev 
+    - libslirp-dev
+    stage-packages:
+    - libsdl2-2.0-0
+    - qt5-gtk-platformtheme
+    - libcurl3-gnutls 
+    - libslirp0
+    - libpcap0.8-dev
+    - libpulse0
+    stage:
+    - -usr/share/doc
+    after:
+    - desktop-qt5
+  desktop-qt5:
+    build-packages:
+    - build-essential
+    - qtbase5-dev
+    - dpkg-dev
+    make-parameters:
+    - FLAVOR=qt5
+    plugin: make
+    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
+    source-subdir: qt
+    stage-packages:
+    - libxkbcommon0
+    - ttf-ubuntu-font-family
+    - dmz-cursor-theme
+    - light-themes
+    - adwaita-icon-theme
+    - gnome-themes-standard
+    - shared-mime-info
+    - libqt5gui5
+    - libgtk2.0-0
+    - libgdk-pixbuf2.0-0
+    - libqt5svg5
+    - libgpm2
+    - freeglut3
+    - libslang2
+    - try:
+      - appmenu-qt5
+    - locales-all
+    - qtwayland5
+    - xdg-user-dirs
+    override-prime: |
+      snapcraftctl prime
+      sed -i 's|XDG_DATA_HOME=$SNAP_USER_DATA|XDG_DATA_HOME=$SNAP_USER_COMMON|' $SNAPCRAFT_PRIME/bin/desktop-launch
+      sed -i 's|XDG_CONFIG_HOME=$SNAP_USER_DATA|XDG_CONFIG_HOME=$SNAP_USER_COMMON|' $SNAPCRAFT_PRIME/bin/desktop-launch
+    stage:
+      - -usr/share/doc
+  plasma-integration:
+    plugin: nil
+    stage-packages:
+    - breeze-icon-theme
+    - kde-style-breeze
+    - plasma-integration
+    stage:
+    - -usr/share/doc
+
+plugs:
+  gtk-3-themes:
+    interface: content
+    target: $SNAP/data-dir/themes
+    default-provider: gtk-common-themes
+  icon-themes:
+    interface: content
+    target: $SNAP/data-dir/icons
+    default-provider: gtk-common-themes
+  sound-themes:
+    interface: content
+    target: $SNAP/data-dir/sounds
+    default-provider: gtk-common-themes
+
+apps:
+  melonds:
+    command: usr/local/bin/melonDS
+    command-chain:
+    - "bin/desktop-launch"
+    desktop: usr/local/share/applications/net.kuribo64.melonDS.desktop
+    environment:
+      HOME: "$SNAP_USER_COMMON"
+      LD_LIBRARY_PATH: "$LD_LIBRARY_PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio"
+      KDE_FORK_SLAVES: 1
+      DISABLE_WAYLAND: 1
+      PATH: "$PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libexec/kf5"
+    plugs:
+    - desktop
+    - desktop-legacy
+    - x11
+    - wayland
+    - audio-playback
+    - audio-record
+    - opengl
+    - joystick
+    - unity7
+    - network
+    - network-bind
+    - network-control
+    - network-manager
+    - network-manager-observe
+    - network-observe
+    - network-setup-control
+    - network-setup-observe
+    - network-status
+    - home
+    - removable-media
+    - gsettings
+    - hardware-observe
+    - mount-observe
+    - bluez
+    - screen-inhibit-control
