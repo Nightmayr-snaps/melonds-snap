@@ -2,7 +2,7 @@
 
 # check latest tagged version
 LATEST_VERSION_TAG="$(curl https://api.github.com/repos/Arisotura/melonDS/releases/latest -s | jq .tag_name -r)"
-CURRENT_VERSION_SNAP="$(snap info melonds | grep stable | head -n 2 | tail -n 1 | awk -F ' ' '{print $2}')"
+CURRENT_VERSION_SNAP="$(snap info melonds | grep edge | head -n 2 | tail -n 1 | awk -F ' ' '{print $2}')"
 
 
 # compare versions
