@@ -16,10 +16,16 @@ jobs:
     - uses: actions/checkout@v2
       with:
         token: ${{ secrets.PAT }}
+    - name: Set up environment
+      run: |
+        sudo apt install jq -y
+        sudo apt install moreutils -y
     - name: Check latest version
       run: |
         ./.github/scripts/version.sh
         echo "BUILD=$(cat build)" >> $GITHUB_ENV
+        echo "LATEST_VERSION=$(cat latest_version)" >> $GITHUB_ENV
+        echo "CURRENT_VERSION=$(cat current_version)" >> $GITHUB_ENV
       id: version-check
     - name: Already latest version - cancelling
       if: env.BUILD == 'false'
@@ -31,7 +37,10 @@ jobs:
         store_login: ${{ secrets.STORE_LOGIN }}
         snap: ${{ steps.snapcraft.outputs.snap }}
         release: edge
-    - name: Committing updated snapcraft.yaml
+    - name: updating versions.json
+      run: |
+        cat versions.json | jq '.edge = "${{ env.LATEST_VERSION }}"' | sponge versions.json
+    - name: Committing updated versions.json
       run: |
         git config --global user.name 'Nightmayr'
         git config --global user.email 'umayr23@gmail.com'
