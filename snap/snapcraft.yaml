@@ -1,7 +1,7 @@
 name: melonds
 base: core20
 adopt-info: melonds
-summary: DS emulator, sorta
+summary: Nintendo DS and DSi emulator
 description: |
   melonDS aims at providing fast and accurate Nintendo DS emulation. While it is still a work in progress, it has a pretty solid set of features:
 
@@ -11,8 +11,13 @@ description: |
   * Joystick support
   * Savestates
   * Various display position/sizing/rotation modes
-  * (WIP) Wifi: local multiplayer, online connectivity
+  * Work-in-progress Wi-Fi emulation for online connectivity and local multiplayer
+  * Experimental emulation of the Nintendo DSi
   * and more are planned!
+
+  **Note:** BIOS and firmware files dumped from a real DS or DSi console are required to use melonDS.
+
+  --
 
   **Disclaimer:**
   This snap is not necessarily endorsed or officially maintained by the upstream developers.
@@ -21,8 +26,8 @@ description: |
 
 license: GPL-3.0
 icon: snap/gui/melonds.png
-grade: stable # must be 'stable' to release into candidate/stable channels
-confinement: strict # use 'strict' once you have the right plugs and slots
+grade: stable
+confinement: strict
 architectures:
   - build-on: amd64
 
