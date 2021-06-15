@@ -1,8 +1,9 @@
-name: Build-Snap-Edge
+name: Build-Snap-Beta
 
 on:
-  pull_request:
-    branches: [ master ]
+#   pull_request:
+#     branches: [ master ]
+  workflow_dispatch:
 
 jobs:
   build:
