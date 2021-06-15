@@ -96,6 +96,7 @@ parts:
     - locales-all
     - qtwayland5
     - xdg-user-dirs
+    - libglib2.0-0
     override-prime: |
       snapcraftctl prime
       sed -i 's|XDG_DATA_HOME=$SNAP_USER_DATA|XDG_DATA_HOME=$SNAP_USER_COMMON|' $SNAPCRAFT_PRIME/bin/desktop-launch
@@ -110,7 +111,7 @@ parts:
     - plasma-integration
     stage:
     - -usr/share/doc
-
+    
 plugs:
   gtk-3-themes:
     interface: content
