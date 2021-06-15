@@ -61,6 +61,7 @@ parts:
     - libslirp0
     - libpcap0.8-dev
     - libpulse0
+    - libarchive13
     stage:
     - -usr/share/doc
     after:
