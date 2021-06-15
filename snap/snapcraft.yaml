@@ -53,6 +53,7 @@ parts:
     - qtbase5-dev 
     - qtdeclarative5-dev 
     - libslirp-dev
+    - libarchive-dev
     stage-packages:
     - libsdl2-2.0-0
     - qt5-gtk-platformtheme
