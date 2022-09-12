@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # check latest tagged version
-LATEST_VERSION_TAG="$(curl https://api.github.com/repos/Arisotura/melonDS/releases/latest -s | jq .tag_name -r)"
+LATEST_VERSION_TAG="$(curl https://api.github.com/repos/melonDS-emu/melonDS/releases/latest -s | jq .tag_name -r)"
 CURRENT_VERSION_SNAP="$(snap info melonds | grep candidate | head -n 2 | tail -n 1 | awk -F ' ' '{print $2}')"
 
 
