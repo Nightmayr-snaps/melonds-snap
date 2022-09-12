@@ -1,6 +1,5 @@
 name: melonds
 base: core20
-version: git
 adopt-info: melonds
 summary: Nintendo DS and DSi emulator
 description: |
