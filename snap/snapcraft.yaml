@@ -43,8 +43,9 @@ parts:
     - -DCMAKE_FIND_ROOT_PATH=/snap/nightmayr-qt-5-15-4-2004-sdk/current
     override-pull: |
       snapcraftctl pull
-      snapcraftctl set-version "$(git describe --tags | cut -d "-" -f1)"
-      git checkout "$(git describe --tags | cut -d "-" -f1)"
+      VERSION="$(git describe --tags | cut -d "-" -f1)"
+      COMMIT_HASH="$(git rev-parse --short HEAD)"
+      snapcraftctl set-version "$VERSION-$COMMIT_HASH"
     override-build: |
       snapcraftctl build
       sed -i 's|Icon=net.kuribo64.melonDS|Icon=/usr/local/share/icons/hicolor/256x256/apps/net.kuribo64.melonDS.png|' $SNAPCRAFT_PART_INSTALL/usr/local/share/applications/net.kuribo64.melonDS.desktop
