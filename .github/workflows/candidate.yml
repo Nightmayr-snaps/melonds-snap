@@ -26,6 +26,8 @@ jobs:
         echo "BUILD=$(cat build)" >> $GITHUB_ENV
         echo "LATEST_VERSION=$(cat latest_version)" >> $GITHUB_ENV
         echo "CURRENT_VERSION=$(cat current_version)" >> $GITHUB_ENV
+        rm -rf latest_version
+        rm -rf current_version
       id: version-check
     - name: Already latest version - cancelling
       if: env.BUILD == 'false'
