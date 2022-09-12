@@ -1,5 +1,6 @@
 name: melonds
 base: core20
+version: git
 adopt-info: melonds
 summary: Nintendo DS and DSi emulator
 description: |
@@ -23,20 +24,23 @@ description: |
   This snap is not necessarily endorsed or officially maintained by the upstream developers.
   * Upstream Project: http://melonds.kuribo64.net/
   * snapcraft.yaml Build Definition: https://github.com/Nightmayr-snaps/melonds-snap/blob/master/snap/snapcraft.yaml
-
 license: GPL-3.0
 icon: snap/gui/melonds.png
 grade: stable
 confinement: strict
+compression: lzo
 architectures:
   - build-on: amd64
 
 parts:
   melonds:
+    after:
+    - desktop-launch
     source: https://github.com/Arisotura/melonDS.git
     plugin: cmake
     cmake-parameters: 
     - -DCMAKE_BUILD_TYPE=Release
+    - -DCMAKE_FIND_ROOT_PATH=/snap/nightmayr-qt-5-15-4-2004-sdk/current
     override-pull: |
       snapcraftctl pull
       snapcraftctl set-version "$(git describe --tags | cut -d "-" -f1)"
@@ -44,75 +48,66 @@ parts:
     override-build: |
       snapcraftctl build
       sed -i 's|Icon=net.kuribo64.melonDS|Icon=/usr/local/share/icons/hicolor/256x256/apps/net.kuribo64.melonDS.png|' $SNAPCRAFT_PART_INSTALL/usr/local/share/applications/net.kuribo64.melonDS.desktop
+    build-snaps:
+      - cmake
+      - nightmayr-qt-5-15-4-2004-sdk/latest/candidate
     build-packages:
-    - cmake
-    - libgtk-3-dev 
     - libcurl4-gnutls-dev 
     - libpcap0.8-dev 
-    - libsdl2-dev 
-    - qtbase5-dev 
-    - qtdeclarative5-dev 
+    - libsdl2-dev
     - libslirp-dev
     - libarchive-dev
+    - libepoxy-dev
     stage-packages:
     - libsdl2-2.0-0
-    - qt5-gtk-platformtheme
     - libcurl3-gnutls 
     - libslirp0
-    - libpcap0.8-dev
+    - libpcap0.8
     - libpulse0
     - libarchive13
+    - libepoxy0
     stage:
     - -usr/share/doc
-    after:
-    - desktop-qt5
-  desktop-qt5:
-    build-packages:
-    - build-essential
-    - qtbase5-dev
-    - dpkg-dev
-    make-parameters:
-    - FLAVOR=qt5
-    plugin: make
-    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
-    source-subdir: qt
-    stage-packages:
-    - libxkbcommon0
-    - ttf-ubuntu-font-family
-    - dmz-cursor-theme
-    - light-themes
-    - adwaita-icon-theme
-    - gnome-themes-standard
-    - shared-mime-info
-    - libqt5gui5
-    - libgtk2.0-0
-    - libgdk-pixbuf2.0-0
-    - libqt5svg5
-    - libgpm2
-    - freeglut3
-    - libslang2
-    - try:
-      - appmenu-qt5
-    - locales-all
-    - qtwayland5
-    - xdg-user-dirs
-    - libglib2.0-0
-    override-prime: |
-      snapcraftctl prime
-      sed -i 's|XDG_DATA_HOME=$SNAP_USER_DATA|XDG_DATA_HOME=$SNAP_USER_COMMON|' $SNAPCRAFT_PRIME/bin/desktop-launch
-      sed -i 's|XDG_CONFIG_HOME=$SNAP_USER_DATA|XDG_CONFIG_HOME=$SNAP_USER_COMMON|' $SNAPCRAFT_PRIME/bin/desktop-launch
-    stage:
-      - -usr/share/doc
-  plasma-integration:
+  desktop-launch:
     plugin: nil
-    stage-packages:
-    - breeze-icon-theme
-    - kde-style-breeze
-    - plasma-integration
-    stage:
-    - -usr/share/doc
-    
+    after: [ kde-neon-extension ]
+    override-pull: |
+      wget https://raw.githubusercontent.com/Nightmayr-snaps/nightmayr-qt-sdk/qt-5-15-4-2004/snap/local/launcher/desktop-launch
+    override-prime: |
+      # Replace desktop-launch from kde-neon extension with our own tweaked version
+      rm $SNAPCRAFT_PRIME/snap/command-chain/desktop-launch
+      cp $SNAPCRAFT_PART_SRC/desktop-launch $SNAPCRAFT_PRIME/snap/command-chain/desktop-launch
+      chmod +x $SNAPCRAFT_PRIME/snap/command-chain/desktop-launch
+    build-packages:
+      - wget
+  kde-neon-extension:
+    build-packages:
+      - g++
+    build-snaps:
+      - nightmayr-qt-5-15-4-2004-sdk/latest/candidate
+    make-parameters:
+      - PLATFORM_PLUG=nightmayr-qt-5-15-4-2004
+    plugin: make
+    source: $SNAPCRAFT_EXTENSIONS_DIR/desktop
+    source-subdir: kde-neon
+  cleanup:
+    after:
+      - kde-neon-extension
+      - melonds
+      - desktop-launch
+    plugin: nil
+    build-snaps:
+      - core20
+      - nightmayr-qt-5-15-4-2004
+    override-prime: |
+      set -eux
+      for snap in "core20" "nightmayr-qt-5-15-4-2004"; do
+        cd "/snap/$snap/current" && find . -type f,l -exec rm -f "$SNAPCRAFT_PRIME/{}" \;
+      done
+
 plugs:
+  desktop:
+    mount-host-font-cache: false
   gtk-3-themes:
     interface: content
     target: $SNAP/data-dir/themes
@@ -125,19 +120,33 @@ plugs:
     interface: content
     target: $SNAP/data-dir/sounds
     default-provider: gtk-common-themes
+  shmem:
+    interface: shared-memory
+    private: true
+  nightmayr-qt-5-15-4-2004:
+    default-provider: nightmayr-qt-5-15-4-2004
+    interface: content
+    target: $SNAP/qt5
+  nightmayr-plasma-integration-5-2004:
+    default-provider: nightmayr-plasma-integration-5-2004
+    interface: content
+    target: $SNAP/kf5
+  nightmayr-qgnomeplatform-qt5-2004:
+    default-provider: nightmayr-qgnomeplatform-qt5-2004
+    interface: content
+    target: $SNAP/qgnomeplatform
 
 apps:
   melonds:
     command: usr/local/bin/melonDS
     command-chain:
-    - "bin/desktop-launch"
+    - "snap/command-chain/desktop-launch"
     desktop: usr/local/share/applications/net.kuribo64.melonDS.desktop
     environment:
       HOME: "$SNAP_USER_COMMON"
-      LD_LIBRARY_PATH: "$LD_LIBRARY_PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio"
-      KDE_FORK_SLAVES: 1
+      LD_LIBRARY_PATH: "$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/pulseaudio"
       DISABLE_WAYLAND: 1
-      PATH: "$PATH:$SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libexec/kf5"
+      PATH: "$PATH:$SNAP/kf5/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/libexec/kf5"
     plugs:
     - desktop
     - desktop-legacy
@@ -157,3 +166,15 @@ apps:
     - mount-observe
     - bluez
     - screen-inhibit-control
+    - shmem
+
+environment:
+  SNAP_DESKTOP_RUNTIME: $SNAP/qt5
+  SNAP_KF_RUNTIME: $SNAP/kf5
+  SNAP_QGNOMEPLATFORM_RUNTIME: $SNAP/qgnomeplatform
+hooks:
+  configure:
+    command-chain:
+      - snap/command-chain/hooks-configure-desktop
+    plugs:
+      - desktop

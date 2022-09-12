@@ -10,10 +10,11 @@ jobs:
     - uses: actions/checkout@v2
       with:
         token: ${{ secrets.PAT }}
-    - uses: snapcore/action-build@v1
+    - uses: snapcore/action-build@v1.1.0
       id: snapcraft
-    - uses: snapcore/action-publish@v1
+    - uses: snapcore/action-publish@v1.1.1
+      env:
+        SNAPCRAFT_STORE_CREDENTIALS: ${{ secrets.STORE_LOGIN }}
       with:
-        store_login: ${{ secrets.STORE_LOGIN }}
         snap: ${{ steps.snapcraft.outputs.snap }}
         release: edge
